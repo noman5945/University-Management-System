@@ -18,6 +18,8 @@ import {
   generateFacultyId,
   generateStudentId,
 } from './user.utils';
+import { verifyToken } from '../Auth/auth.utils';
+import { USER_ROLE } from './user.constant';
 
 const createStudentIntoDB = async (password: string, payload: TStudent) => {
   // create a user object
@@ -180,8 +182,28 @@ const createAdminIntoDB = async (password: string, payload: TAdmin) => {
   }
 };
 
+const getMyProfile = async (token: string) => {
+  if (!token) {
+    throw new AppError(httpStatus.UNAUTHORIZED, 'Unauthorized access denied');
+  }
+  const decoded = verifyToken(config.jwt_access_secret as string, token);
+  const { role, userId } = decoded;
+  let result = null;
+  const query = { id: userId };
+  if (role === USER_ROLE.admin) {
+    result = await Admin.find(query);
+  } else if (role === USER_ROLE.student) {
+    result = await Student.find(query);
+  } else if (role === USER_ROLE.faculty) {
+    result = await Faculty.find(query);
+  }
+
+  return result;
+};
+
 export const UserServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
+  getMyProfile,
 };

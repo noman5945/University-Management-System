@@ -42,8 +42,20 @@ const createAdmin = catchAsync(async (req, res) => {
   });
 });
 
+const getMyProfile = catchAsync(async (req, res) => {
+  const token = req.headers.authorization;
+  const result = await UserServices.getMyProfile(token as string);
+  sendResponse(res, {
+    statusCode: httpStatus.OK,
+    success: true,
+    message: 'User personal data fetched successfuly',
+    data: result,
+  });
+});
+
 export const UserControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMyProfile,
 };
